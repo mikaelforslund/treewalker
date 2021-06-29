@@ -17,6 +17,10 @@ import org.dom4j.io.SAXReader;
  */
 public final class App {
 
+    public static void main(String[] args) throws DocumentException {
+        new App();
+    }
+
     private App() throws DocumentException {
         SAXReader reader = new SAXReader();
         Document document = reader.read(new File("./diagram.drawio"));
@@ -35,34 +39,14 @@ public final class App {
             if(root == null) {
                 root = new TreeNode<CNode>(cnode);
             } else {
-                treeNode = root.findTreeNode(new SearchCriteria(new CNode(cnode.getParent())));
+                treeNode = root.findTreeNode(searchCriteria(cnode));
                 if(treeNode != null)
                     treeNode.addChild(cnode);
             }           
         }
 
-        for (TreeNode<CNode> node : root) {
-			String indent = createIndent(node.getLevel());
-			System.out.println(indent + node.data);
-		}
+        root.printTree();
     }
-
-    /**
-     * Says hello to the world.
-     * @param args The arguments of the program.
-     * @throws DocumentException
-     */
-    public static void main(String[] args) throws DocumentException {
-        new App();
-    }
-
-    private String createIndent(int depth) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < depth; i++) {
-			sb.append(' ');
-		}
-		return sb.toString();
-	}
 
     private CNode createCNode(Node node) { 
         // if this is an object/mxCell path then flatten them together...
@@ -89,24 +73,16 @@ public final class App {
 
         return list.stream().filter(n -> StringUtils.isNoneEmpty(n.getId())).sorted(cmp).collect(Collectors.toList());
     }
-}
 
-class SearchCriteria implements Comparable<CNode> {            
-    private CNode searchNode;
-
-    public SearchCriteria(CNode searchNode) {
-        this.searchNode = searchNode;
-    }
-
-    @Override
-    public int compareTo(CNode cnode) {
-        if (cnode == null)
-            return 1;
-        boolean nodeOk = cnode.getId().equals(searchNode.getId());
-        return nodeOk ? 0 : 1;
-    }
-
-    public CNode getSearchNode() {
-        return searchNode;
+    private Comparable<CNode> searchCriteria(CNode searchNode) {
+        return new Comparable<CNode>() {            
+            @Override
+            public int compareTo(CNode cnode) {
+                if (cnode == null)
+                    return 1;
+                boolean nodeOk = cnode.getId().equals(searchNode.getParent());
+                return nodeOk ? 0 : 1;
+            }
+        };
     }
 }

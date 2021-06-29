@@ -68,4 +68,18 @@ public class TreeNode<T> implements Iterable<TreeNode<T>> {
 		return iter;
 	}
 
+	public void printTree() { 
+		for (TreeNode<T> node : this) {
+			String indent = createIndent(node.getLevel());
+			System.out.println(indent + node.data);
+		}
+	}
+
+	private String createIndent(int depth) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < depth; i++) {
+			sb.append(' ');
+		}
+		return sb.toString();
+	}
 }
